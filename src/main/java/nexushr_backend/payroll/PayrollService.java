@@ -1,7 +1,21 @@
 package nexushr_backend.payroll;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.Font;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+
+import nexushr_backend.employee.Employee;
+import nexushr_backend.employee.EmployeeRepository;
+
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,9 +23,14 @@ import java.util.Optional;
 public class PayrollService {
 
     private final PayrollRepository payrollRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public PayrollService(PayrollRepository payrollRepository) {
+    public PayrollService(
+            PayrollRepository payrollRepository,
+            EmployeeRepository employeeRepository) {
+
         this.payrollRepository = payrollRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     // Create Payroll
@@ -87,5 +106,213 @@ public class PayrollService {
         }
 
         return false;
+    }
+
+    // Generate Payslip PDF
+    public byte[] generatePayslipPdf(Long payrollId) {
+
+        Payroll payroll = payrollRepository.findById(payrollId)
+                .orElseThrow(() ->
+                        new RuntimeException("Payroll not found"));
+
+        Employee employee = employeeRepository
+                .findById(payroll.getEmployeeId())
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found"));
+
+        try {
+
+            ByteArrayOutputStream outputStream =
+                    new ByteArrayOutputStream();
+
+            Document document = new Document();
+
+            PdfWriter.getInstance(document, outputStream);
+
+            document.open();
+
+            // Title
+            Font titleFont = new Font(
+                    Font.HELVETICA,
+                    20,
+                    Font.BOLD
+            );
+
+            Paragraph title =
+                    new Paragraph("NexusHR", titleFont);
+
+            title.setAlignment(Paragraph.ALIGN_CENTER);
+
+            document.add(title);
+
+            // Subtitle
+            Font subtitleFont = new Font(
+                    Font.HELVETICA,
+                    14,
+                    Font.BOLD
+            );
+
+            Paragraph subtitle =
+                    new Paragraph("EMPLOYEE PAYSLIP", subtitleFont);
+
+            subtitle.setAlignment(Paragraph.ALIGN_CENTER);
+
+            document.add(subtitle);
+
+            document.add(new Paragraph(" "));
+
+            // Employee Information
+            document.add(
+                    new Paragraph("Employee Information")
+            );
+
+            PdfPTable employeeTable =
+                    new PdfPTable(2);
+
+            employeeTable.setWidthPercentage(100);
+
+            addRow(
+                    employeeTable,
+                    "Employee ID",
+                    employee.getEmployeeCode()
+            );
+
+            addRow(
+                    employeeTable,
+                    "Employee Name",
+                    employee.getFirstName()
+                            + " "
+                            + employee.getLastName()
+            );
+
+            addRow(
+                    employeeTable,
+                    "Department",
+                    employee.getDepartment()
+            );
+
+            addRow(
+                    employeeTable,
+                    "Designation",
+                    employee.getDesignation()
+            );
+
+            document.add(employeeTable);
+
+            document.add(new Paragraph(" "));
+
+            // Payroll Information
+            document.add(
+                    new Paragraph("Payroll Information")
+            );
+
+            PdfPTable payrollTable =
+                    new PdfPTable(2);
+
+            payrollTable.setWidthPercentage(100);
+
+            addRow(
+                    payrollTable,
+                    "Payslip ID",
+                    String.valueOf(payroll.getId())
+            );
+
+            addRow(
+                    payrollTable,
+                    "Month",
+                    payroll.getMonth()
+            );
+
+            addRow(
+                    payrollTable,
+                    "Basic Salary",
+                    formatAmount(payroll.getBasicSalary())
+            );
+
+            addRow(
+                    payrollTable,
+                    "Allowances",
+                    formatAmount(payroll.getAllowances())
+            );
+
+            addRow(
+                    payrollTable,
+                    "Deductions",
+                    formatAmount(payroll.getDeductions())
+            );
+
+            addRow(
+                    payrollTable,
+                    "Net Salary",
+                    formatAmount(payroll.getNetSalary())
+            );
+
+            addRow(
+                    payrollTable,
+                    "Payment Status",
+                    payroll.getPaymentStatus()
+            );
+
+            document.add(payrollTable);
+
+            document.add(new Paragraph(" "));
+
+            Paragraph footer =
+                    new Paragraph(
+                            "This is a computer-generated payslip."
+                    );
+
+            footer.setAlignment(Paragraph.ALIGN_CENTER);
+
+            document.add(footer);
+
+            document.close();
+
+            return outputStream.toByteArray();
+
+        } catch (DocumentException e) {
+
+            throw new RuntimeException(
+                    "Failed to generate payslip PDF",
+                    e
+            );
+        }
+    }
+
+    // Helper method for PDF table rows
+    private void addRow(
+            PdfPTable table,
+            String label,
+            String value) {
+
+        PdfPCell labelCell =
+                new PdfPCell(
+                        new Phrase(label)
+                );
+
+        PdfPCell valueCell =
+                new PdfPCell(
+                        new Phrase(
+                                value != null
+                                        ? value
+                                        : "-"
+                        )
+                );
+
+        table.addCell(labelCell);
+        table.addCell(valueCell);
+    }
+
+    // Format salary amount
+    private String formatAmount(Double amount) {
+
+        if (amount == null) {
+            return "₹0.00";
+        }
+
+        return String.format(
+                "₹%.2f",
+                amount
+        );
     }
 }
