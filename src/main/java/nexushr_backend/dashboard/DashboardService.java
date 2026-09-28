@@ -3,6 +3,7 @@ package nexushr_backend.dashboard;
 import nexushr_backend.employee.EmployeeRepository;
 import nexushr_backend.leave.LeaveRepository;
 import nexushr_backend.payroll.PayrollRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +23,7 @@ public class DashboardService {
         this.payrollRepository = payrollRepository;
     }
 
+    @Cacheable("dashboardSummary")
     public DashboardSummary getSummary() {
 
         DashboardSummary summary = new DashboardSummary();

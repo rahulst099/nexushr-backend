@@ -40,9 +40,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // =========================
-    // CORS CONFIGURATION
-    // =========================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -87,7 +84,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
-                // ENABLE CORS
                 .cors(cors -> cors.configurationSource(
                         corsConfigurationSource()
                 ))
@@ -99,13 +95,15 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(
+                                        "/api/users/login",
+                                        "/api/employees/signup",
+                                        "/api/employees/login",
+                                        "/actuator",
+                                        "/actuator/**"
+                                ).permitAll()
 
-                        .requestMatchers(
-                                "/api/users",
-                                "/api/users/login"
-                        ).permitAll()
-
-                        .requestMatchers(
+                .requestMatchers(
                                 org.springframework.http.HttpMethod.OPTIONS,
                                 "/**"
                         ).permitAll()

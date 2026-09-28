@@ -27,42 +27,105 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
+    // =========================
+    // CREATE USER
+    // ADMIN ONLY
+    // =========================
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public ResponseEntity<User> createUser(
+            @RequestBody User user,
+            Authentication authentication) {
+
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(
+                userService.createUser(user)
+        );
     }
 
+    // =========================
+    // GET ALL USERS
+    // ADMIN ONLY
+    // =========================
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<User>> getAllUsers(
+            Authentication authentication) {
+
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(
+                userService.getAllUsers()
+        );
     }
 
+    // =========================
+    // GET USER BY ID
+    // ADMIN ONLY
+    // =========================
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).build();
+        }
+
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // =========================
+    // UPDATE USER
+    // ADMIN ONLY
+    // =========================
     @PutMapping("/{id}")
-    public User updateUser(
+    public ResponseEntity<User> updateUser(
             @PathVariable Long id,
-            @RequestBody User user) {
+            @RequestBody User user,
+            Authentication authentication) {
 
-        return userService.updateUser(id, user);
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok(
+                userService.updateUser(id, user)
+        );
     }
 
+    // =========================
+    // DELETE USER
+    // ADMIN ONLY
+    // =========================
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(403).build();
+        }
 
         userService.deleteUser(id);
 
-        return ResponseEntity.ok("User deleted successfully");
+        return ResponseEntity.ok(
+                "User deleted successfully"
+        );
     }
 
+    // =========================
     // LOGIN
+    // PUBLIC
+    // =========================
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<String> login(
+            @RequestBody LoginRequest request) {
 
         Authentication authentication =
                 authenticationManager.authenticate(
@@ -78,5 +141,18 @@ public class UserController {
         );
 
         return ResponseEntity.ok(token);
+    }
+
+    // =========================
+    // ADMIN CHECK
+    // =========================
+    private boolean isAdmin(Authentication authentication) {
+
+        return authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority()
+                                .equals("ROLE_ADMIN")
+                );
     }
 }

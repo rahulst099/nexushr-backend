@@ -1,6 +1,8 @@
 package nexushr_backend.dashboard;
 
-public class DashboardSummary {
+import java.io.Serializable;
+
+public class DashboardSummary implements Serializable {
 
     private long totalEmployees;
     private long activeEmployees;

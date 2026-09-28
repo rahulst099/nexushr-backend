@@ -9,6 +9,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.Document;
+import org.springframework.cache.annotation.CacheEvict;
 
 import nexushr_backend.employee.Employee;
 import nexushr_backend.employee.EmployeeRepository;
@@ -34,6 +35,7 @@ public class PayrollService {
     }
 
     // Create Payroll
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public Payroll createPayroll(Payroll payroll) {
 
         double basicSalary = payroll.getBasicSalary() != null
@@ -88,6 +90,7 @@ public class PayrollService {
     }
 
     // Mark Payroll as Paid
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public Optional<Payroll> markAsPaid(Long id) {
 
         return payrollRepository.findById(id)
@@ -98,6 +101,7 @@ public class PayrollService {
     }
 
     // Delete Payroll
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public boolean deletePayroll(Long id) {
 
         if (payrollRepository.existsById(id)) {

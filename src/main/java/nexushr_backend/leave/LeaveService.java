@@ -1,6 +1,7 @@
 package nexushr_backend.leave;
 
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ public class LeaveService {
     }
 
     // Apply Leave
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public Leave applyLeave(Leave leave) {
         leave.setStatus("PENDING");
         return leaveRepository.save(leave);
@@ -41,6 +43,7 @@ public class LeaveService {
     }
 
     // Approve Leave
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public Optional<Leave> approveLeave(Long id) {
         return leaveRepository.findById(id).map(leave -> {
             leave.setStatus("APPROVED");
@@ -49,6 +52,7 @@ public class LeaveService {
     }
 
     // Reject Leave
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public Optional<Leave> rejectLeave(Long id) {
         return leaveRepository.findById(id).map(leave -> {
             leave.setStatus("REJECTED");
@@ -57,6 +61,7 @@ public class LeaveService {
     }
 
     // Delete Leave
+    @CacheEvict(value = "dashboardSummary", allEntries = true)
     public boolean deleteLeave(Long id) {
         if (leaveRepository.existsById(id)) {
             leaveRepository.deleteById(id);
@@ -64,5 +69,6 @@ public class LeaveService {
         }
 
         return false;
+
     }
 }

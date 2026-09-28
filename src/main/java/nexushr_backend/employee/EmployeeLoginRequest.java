@@ -1,12 +1,9 @@
-package nexushr_backend.user;
+package nexushr_backend.employee;
 
-public class LoginRequest {
+public class EmployeeLoginRequest {
 
     private String username;
     private String password;
-
-    public LoginRequest() {
-    }
 
     public String getUsername() {
         return username;

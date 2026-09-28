@@ -1,15 +1,9 @@
 package nexushr_backend.employee;
 
-import jakarta.persistence.*;
-import nexushr_backend.user.User;
+public class EmployeeSignupRequest {
 
-@Entity
-@Table(name = "employees")
-public class Employee {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String username;
+    private String password;
 
     private String employeeCode;
     private String firstName;
@@ -18,21 +12,21 @@ public class Employee {
     private String phone;
     private String department;
     private String designation;
-    private Double salary;
-    private Boolean active;
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 
-    public Employee() {
+    public String getUsername() {
+        return username;
     }
 
-    public Long getId() {
-        return id;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmployeeCode() {
@@ -89,29 +83,5 @@ public class Employee {
 
     public void setDesignation(String designation) {
         this.designation = designation;
-    }
-
-    public Double getSalary() {
-        return salary;
-    }
-
-    public void setSalary(Double salary) {
-        this.salary = salary;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }
