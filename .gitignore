@@ -38,3 +38,4 @@ build/
 application-local.properties
 application-secret.properties
 src/main/resources/application.properties
+k8s/secret.yaml
