@@ -1,0 +1,24 @@
+services:
+
+  nexushr-backend:
+
+    build: .
+
+    container_name: nexushr-backend
+
+    ports:
+
+      - "8081:8080"
+
+    environment:
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/nexushr
+
+      SPRING_DATASOURCE_USERNAME: postgres
+
+      SPRING_DATASOURCE_PASSWORD: ${Rahul@123}
+      SPRING_DATA_REDIS_PORT: 6379
+
+    extra_hosts:
+
+      - "host.docker.internal:host-gateway"
